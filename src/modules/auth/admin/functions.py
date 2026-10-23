@@ -6,13 +6,14 @@ from fastapi import Request
 from jose import JWTError, jwt
 from src.configs.env import ALGORITHM, SECRET_KEY
 
-from fastapi import HTTPException, status
+from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from src.utils.jwt import create_access_token, create_refresh_token
 from src.utils.security import hash_password, verify_password
 from src.utils.validations import validate_email, validate_password
 
+#Admin registration
 
 async def register_admin(data: Create_Admin, db: AsyncSession):
 
@@ -113,7 +114,7 @@ async def login_admin(data : Admin_login, db : AsyncSession):
             status_code=status.HTTP_200_OK,
             content = {
                 "success" : True,
-                "msg" : "Successfully regitered"
+                "msg" : "Successfully LogIn"
             }
         )
 
@@ -174,7 +175,7 @@ async def logout(current_user, db:AsyncSession):
 
         response.delete_cookie(
             key="refresh_token",
-            path="/auth",
+            path="/",
             httponly=True,
             samesite="lax",
         )

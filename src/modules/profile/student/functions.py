@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from fastapi import status
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,27 +11,65 @@ from src.utils.validations import check_phone
 
 
 async def get_student_detail(email : str, db:AsyncSession):
-    result = await db.execute(select(Student).where(Student.email == email))
-    student = result.scalar_one_or_none()
 
-    if not student:
+    try:
+        result = await db.execute(select(Student).where(Student.email == email))
+        student = result.scalar_one_or_none()
+
+
+        if not student:
+            return JSONResponse(
+                status_code = status.HTTP_404_NOT_FOUND,
+                content = {
+                    "sucess" : False,
+                    "msg" : "Student with this email not found"
+                }
+            )
+
+        print(student)
+
+        '''
+
+        l1 = []
+
+        for s in student:
+            l1.append({
+                "name" : f"{s.first_name}  {s.last_name}",
+                "age" : s.age, 
+                "ph_no" : s.ph_no, 
+                "email" : s.email
+                })
+
+        '''
+
         return JSONResponse(
-            status_code = status.HTTP_404_NOT_FOUND,
-            content = {
-                "sucess" : False,
-                "msg" : "Student with this email not found"
+            status_code=status.HTTP_200_OK,
+            content={
+                "success": True,
+                "msg" : "Data featch successfully",
+                "student" : {
+                    "id" : student.id,
+                    "name" : f"{student.first_name}  {student.last_name}",
+                    "age" : student.age, 
+                    "ph_no" : student.ph_no, 
+                    "email" : student.email
+                }
+
             }
+
         )
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={
-            "success": True,
-            "msg" : "Data featch successfully",
-            "student" : student
-        }
+    
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "success": False,
+                "message": "Invalid Credential",
+                "error" : str(e)
+            },
+        )
 
-    )
 
 
 
